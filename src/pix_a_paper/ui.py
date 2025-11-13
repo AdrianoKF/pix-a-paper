@@ -1,10 +1,10 @@
 from typing import cast
 
-import rich_pixels
 import textual.app
 import textual.containers
 import textual.message
 import textual.widgets
+from textual_image.renderable import TGPImage as TextualImage
 
 from pix_a_paper.api import Dimensions, ImageMetadata, PixabayClient
 from pix_a_paper.util import set_wallpaper
@@ -99,7 +99,7 @@ class WallpaperApp(textual.app.App):
         yield textual.widgets.Footer()
         with textual.containers.VerticalScroll():
             yield ImageList(images.hits)
-            self.container = textual.containers.Container(id="image-container")
+            self.container = textual.widgets.Static(id="image-container", expand=True)
             yield self.container
 
     def on_mount(self) -> None:
@@ -108,22 +108,11 @@ class WallpaperApp(textual.app.App):
         list_view.focus()
 
     def on_image_list_highlighted(self, event: ImageList.Highlighted) -> None:
-        img = event.image
-        path = self.client.get_image(img)
-
-        # Get container dimensions (width in characters, height in lines)
-        container_width = self.container.size.width
-        container_height = self.container.size.height
-
-        # Resize image to fit container
-        pixels = rich_pixels.Pixels.from_image_path(
-            path, resize=(container_width, container_height)
-        )
-        self.container.remove_children()
-        self.container.mount(textual.widgets.Static(pixels))
+        """Render the highlighted image in the container."""
+        path = self.client.get_image(event.image)
+        img = TextualImage(path, width="auto", height="auto")
+        self.container.update(img)
 
     def on_image_list_selected(self, event: ImageList.Selected) -> None:
-        img = event.image
-        path = self.client.get_image(img)
-
+        path = self.client.get_image(event.image)
         set_wallpaper(path)

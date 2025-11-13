@@ -15,4 +15,10 @@ dependencies = [
     "rich>=14.2.0",
     "rich-pixels>=3.0.1",
     "textual>=6.6.0",
+    "textual-image>=0.8.4",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.4",
 ]
